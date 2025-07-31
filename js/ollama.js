@@ -1,6 +1,6 @@
 // Load configuration from localStorage or use default
 let OLLAMA_API_URL =
-  localStorage.getItem("ollamaApiUrl") || "http://your-server-ip:11434";
+  localStorage.getItem("ollamaApiUrl") || "http://localhost:11434";
 // Load saved refresh interval from localStorage or use default
 const DEFAULT_REFRESH_INTERVAL = 30;
 let REFRESH_INTERVAL =
@@ -14,6 +14,8 @@ let countdownInterval;
 // Debug logging function
 function debugLog(message, data = null) {
   const logElement = document.getElementById("debug-content");
+  if (!logElement) return; // Safety check - only log if debug element exists
+
   const timestamp = new Date().toLocaleTimeString();
 
   let logMessage = `[${timestamp}] ${message}`;
@@ -28,6 +30,9 @@ function debugLog(message, data = null) {
 
   logElement.innerHTML = logMessage + "<hr>" + logElement.innerHTML;
 }
+
+// Make fetchGpuData globally accessible
+window.fetchGpuData = null;
 
 // Main app logic
 document.addEventListener("DOMContentLoaded", function () {
@@ -64,8 +69,8 @@ document.addEventListener("DOMContentLoaded", function () {
     if (updated) {
       document.getElementById("api-config").classList.remove("visible");
       fetchRunningModels();
-      if (typeof fetchGpuData === 'function') {
-        fetchGpuData();
+      if (window.fetchGpuData && typeof window.fetchGpuData === 'function') {
+        window.fetchGpuData();
       }
     }
   });
@@ -77,8 +82,8 @@ document.addEventListener("DOMContentLoaded", function () {
   // Setup refresh button
   document.getElementById("refresh-btn").addEventListener("click", function () {
     fetchRunningModels();
-    if (typeof fetchGpuData === 'function') {
-      fetchGpuData();
+    if (window.fetchGpuData && typeof window.fetchGpuData === 'function') {
+      window.fetchGpuData();
     }
     resetCountdown();
   });
@@ -133,8 +138,8 @@ function startCountdown() {
 
     if (countdownValue <= 0) {
       fetchRunningModels();
-      if (typeof fetchGpuData === 'function') {
-        fetchGpuData();
+      if (window.fetchGpuData && typeof window.fetchGpuData === 'function') {
+        window.fetchGpuData();
       }
       resetCountdown();
     }
@@ -148,6 +153,14 @@ function resetCountdown() {
 
 async function fetchRunningModels() {
   const modelsContainer = document.getElementById("models-container");
+  if (!modelsContainer) {
+    debugLog("Models container not found in DOM", null, 'error');
+    return;
+  }
+
+  // Show loading state
+  modelsContainer.innerHTML = '<div class="loading">Loading models...</div>';
+  
   let runningModels = [];
   let allModels = [];
 
@@ -156,7 +169,16 @@ async function fetchRunningModels() {
 
     // First try to get all available models
     try {
-      const tagsResponse = await fetch(`${OLLAMA_API_URL}/api/tags`);
+      debugLog(`Attempting to fetch available models from: ${OLLAMA_API_URL}/api/tags`);
+      const tagsResponse = await fetch(`${OLLAMA_API_URL}/api/tags`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        },
+        mode: 'cors',
+        credentials: 'omit',
+        cache: 'no-cache'
+      });
 
       if (!tagsResponse.ok) {
         throw new Error(
@@ -173,8 +195,16 @@ async function fetchRunningModels() {
 
     // Get running models using the correct structure
     try {
-      debugLog("Fetching running models with /api/ps...");
-      const psResponse = await fetch(`${OLLAMA_API_URL}/api/ps`);
+      debugLog(`Attempting to fetch running models from: ${OLLAMA_API_URL}/api/ps`);
+      const psResponse = await fetch(`${OLLAMA_API_URL}/api/ps`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        },
+        mode: 'cors',
+        credentials: 'omit',
+        cache: 'no-cache'
+      });
 
       if (psResponse.ok) {
         const psData = await psResponse.json();
@@ -213,21 +243,39 @@ async function fetchRunningModels() {
     // Determine if we should use mobile view based on screen width
     const isMobile = window.innerWidth < 768;
 
+    // Always render the models view, even if arrays are empty
+    debugLog(`Rendering models view: ${runningModels.length} running, ${allModels.length} available`);
+    
     // Render either mobile cards or desktop table
     if (isMobile) {
       renderMobileCards(runningModels, allModels);
     } else {
       renderModelTable(runningModels, allModels);
     }
+
+    // If no models at all, show helpful message
+    if (runningModels.length === 0 && allModels.length === 0) {
+      modelsContainer.innerHTML = `
+        <div class="no-models">
+            <p>No models found. This could mean:</p>
+            <ul>
+              <li>Ollama is not running</li>
+              <li>No models are installed (try: <code>ollama pull llama2</code>)</li>
+              <li>API URL is incorrect: ${OLLAMA_API_URL}</li>
+            </ul>
+            <p>Click "Configure APIs" to update the API URL.</p>
+        </div>
+      `;
+    }
   } catch (error) {
     console.error("Error fetching data:", error);
-    debugLog(`Error: ${error.message}`);
+    debugLog(`Error: ${error.message}`, error, 'error');
     modelsContainer.innerHTML = `
       <div class="no-models">
           <p>Error connecting to Ollama API. Make sure your Ollama container is running and the API URL is correct.</p>
           <p>Error: ${error.message}</p>
           <p>Current API URL: ${OLLAMA_API_URL}</p>
-          <p>Click the "Configure API" button to update the API URL.</p>
+          <p>Click the "Configure APIs" button to update the API URL.</p>
       </div>
   `;
   }
@@ -235,6 +283,10 @@ async function fetchRunningModels() {
 
 function renderMobileCards(runningModels, allModels) {
   const modelsContainer = document.getElementById("models-container");
+  
+  // Ensure arrays exist and are arrays
+  runningModels = runningModels || [];
+  allModels = allModels || [];
 
   // Debug the incoming data
   debugLog(
@@ -345,6 +397,10 @@ function renderMobileCards(runningModels, allModels) {
 
 function renderModelTable(runningModels, allModels) {
   const modelsContainer = document.getElementById("models-container");
+  
+  // Ensure arrays exist and are arrays
+  runningModels = runningModels || [];
+  allModels = allModels || [];
 
   // Debug the incoming data
   debugLog(

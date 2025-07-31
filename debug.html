@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Debug Log - GPU Monitor & Ollama Manager</title>
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Debug Log</h1>
+        <div class="controls">
+          <button
+            onclick="window.location.href='index.html'"
+            class="config-btn"
+          >
+            Back to Main
+          </button>
+          <button id="clear-log-btn" class="refresh-btn">Clear Log</button>
+          <button id="export-log-btn" class="config-btn">Export Log</button>
+        </div>
+      </div>
+
+      <div class="debug-controls">
+        <div class="config-row">
+          <label>
+            <input type="checkbox" id="auto-scroll" checked /> Auto-scroll to
+            new entries
+          </label>
+        </div>
+        <div class="config-row">
+          <label for="log-level">Log Level Filter:</label>
+          <select id="log-level">
+            <option value="all">All Messages</option>
+            <option value="error">Errors Only</option>
+            <option value="warning">Warnings & Errors</option>
+            <option value="info">Info & Above</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="debug-log" class="debug-log-full">
+        <h3>Debug Messages</h3>
+        <div id="debug-content"></div>
+      </div>
+    </div>
+
+    <script src="js/debug.js"></script>
+    <script src="js/ollama.js"></script>
+    <script src="js/gpu.js"></script>
+    <script src="js/api-test.js"></script>
+  </body>
+</html>

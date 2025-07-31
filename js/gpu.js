@@ -1,5 +1,27 @@
 // Load configuration from localStorage or use explicit default
 let GPU_API_URL = localStorage.getItem("gpuApiUrl") || "http://your-server-ip:5000/api/gpu-data";
+const DEFAULT_GPU_API_URL = "http://your-server-ip:5000/api/gpu-data";
+
+// Function to check if GPU API URL is set to a non-default value
+function isGpuApiConfigured() {
+  return GPU_API_URL !== DEFAULT_GPU_API_URL && GPU_API_URL.trim() !== "";
+}
+
+// Function to show/hide GPU section based on configuration
+function updateGpuSectionVisibility() {
+  const gpuSection = document.getElementById("gpu-section");
+  const gpuContainer = document.getElementById("gpu-container");
+
+  if (isGpuApiConfigured()) {
+    if (gpuSection) gpuSection.style.display = "block";
+    if (gpuContainer) gpuContainer.style.display = "block";
+    gpuDebugLog("GPU section shown - API URL is configured");
+  } else {
+    if (gpuSection) gpuSection.style.display = "none";
+    if (gpuContainer) gpuContainer.style.display = "none";
+    gpuDebugLog("GPU section hidden - using default API URL");
+  }
+}
 
 // Debug logging function (reusing from ollama.js)
 function gpuDebugLog(message, data = null) {
@@ -20,6 +42,29 @@ function gpuDebugLog(message, data = null) {
   logElement.innerHTML = logMessage + "<hr>" + logElement.innerHTML;
 }
 
+// Function to update GPU URL from the configuration panel (globally accessible)
+function updateGpuApiUrl(newUrl) {
+  if (newUrl && newUrl.trim() !== "") {
+    // Make sure to use the absolute URL
+    GPU_API_URL = newUrl.trim();
+    localStorage.setItem("gpuApiUrl", GPU_API_URL);
+    gpuDebugLog(`GPU API URL updated to: ${GPU_API_URL}`);
+
+    // Update section visibility based on new configuration
+    updateGpuSectionVisibility();
+
+    // Only fetch data if GPU is configured
+    if (isGpuApiConfigured()) {
+      // Check if fetchGpuData function exists (it's defined inside DOMContentLoaded)
+      if (typeof fetchGpuData === 'function') {
+        fetchGpuData();
+      }
+    }
+    return true;
+  }
+  return false;
+}
+
 // Main GPU monitoring logic
 document.addEventListener("DOMContentLoaded", function () {
   // Initialize GPU API URL input
@@ -34,7 +79,12 @@ document.addEventListener("DOMContentLoaded", function () {
     toggleBtn.addEventListener("click", function () {
       const container = document.getElementById("gpu-container");
       if (container) {
-        container.classList.toggle("hidden");
+        // Toggle between display: block and display: none
+        if (container.style.display === "none") {
+          container.style.display = "block";
+        } else {
+          container.style.display = "none";
+        }
       }
     });
   }
@@ -43,7 +93,10 @@ document.addEventListener("DOMContentLoaded", function () {
   const refreshBtn = document.getElementById("refresh-btn");
   if (refreshBtn) {
     refreshBtn.addEventListener("click", function () {
-      fetchGpuData();
+      // Only fetch GPU data if it's configured
+      if (isGpuApiConfigured()) {
+        fetchGpuData();
+      }
       // Update the refresh button to show it's working
       refreshBtn.textContent = "Refreshing...";
       setTimeout(() => {
@@ -71,8 +124,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const newGpuUrl = document.getElementById("gpu-api-url").value;
       if (updateGpuApiUrl(newGpuUrl)) {
         apiConfig.style.display = "none";
-        gpuDebugLog("Configuration saved, fetching new data...");
-        fetchGpuData();
+        gpuDebugLog("Configuration saved");
       }
     });
   }
@@ -124,8 +176,10 @@ document.addEventListener("DOMContentLoaded", function () {
       if (countdownDisplay) countdownDisplay.textContent = countdown;
 
       if (countdown <= 0) {
-        // Refresh data
-        fetchGpuData();
+        // Only refresh GPU data if it's configured
+        if (isGpuApiConfigured()) {
+          fetchGpuData();
+        }
         countdown = refreshInterval;
         if (countdownDisplay) countdownDisplay.textContent = countdown;
       }
@@ -135,9 +189,15 @@ document.addEventListener("DOMContentLoaded", function () {
   // Start the countdown and data fetching
   startCountdown();
 
-  // Initial GPU data load
-  fetchGpuData();
+  // Check GPU section visibility on initial load
+  updateGpuSectionVisibility();
 
+  // Initial GPU data load (only if GPU is configured)
+  if (isGpuApiConfigured()) {
+    fetchGpuData();
+  }
+
+  // Define fetchGpuData function and make it globally accessible
   async function fetchGpuData() {
     const gpuContainer = document.getElementById("gpu-container");
     if (!gpuContainer) return; // Safety check
@@ -413,19 +473,6 @@ document.addEventListener("DOMContentLoaded", function () {
     return url;
   }
 
-  // Function to update GPU URL from the configuration panel
-  function updateGpuApiUrl(newUrl) {
-    if (newUrl && newUrl.trim() !== "") {
-      // Make sure to use the absolute URL
-      GPU_API_URL = newUrl.trim();
-      localStorage.setItem("gpuApiUrl", GPU_API_URL);
-      gpuDebugLog(`GPU API URL updated to: ${GPU_API_URL}`);
-      fetchGpuData();
-      return true;
-    }
-    return false;
-  }
-
   // Listen for window resize to switch between mobile and desktop views
   window.addEventListener("resize", function () {
     // Only re-render if we're actually displaying the full GPU data
@@ -439,6 +486,9 @@ document.addEventListener("DOMContentLoaded", function () {
   if (apiConfig) {
     apiConfig.style.display = "none";
   }
+
+  // Make fetchGpuData globally accessible
+  window.fetchGpuData = fetchGpuData;
 
   // Clean up intervals when page is being unloaded to prevent memory leaks
   window.addEventListener("beforeunload", function () {

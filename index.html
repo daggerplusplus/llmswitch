@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LLMSwitch</title>
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>LLMSwitch</h1>
+        <h2>GPU Monitor & Ollama Manager</h2>
+        <div class="controls">
+          <button id="config-btn" class="config-btn">Configure APIs</button>
+          <button id="refresh-btn" class="refresh-btn">Refresh Now</button>
+          <div class="auto-refresh">
+            <span
+              >Auto-refresh:
+              <span id="countdown" class="countdown">30</span>s</span
+            >
+            <div class="refresh-controls">
+              <input
+                type="number"
+                id="refresh-interval"
+                class="refresh-input"
+                min="5"
+                max="300"
+                value="30"
+              />
+              <button id="save-refresh-btn" class="save-refresh-btn">
+                Set
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="api-config" class="api-config">
+        <h3>API Configuration</h3>
+        <div class="config-row">
+          <label for="gpu-api-url">GPU API URL:</label>
+          <input
+            type="text"
+            id="gpu-api-url"
+            placeholder="GPU API URL (e.g., http://your-server-ip:5000)"
+          />
+        </div>
+        <div class="config-row">
+          <label for="api-url">Ollama API URL:</label>
+          <input
+            type="text"
+            id="api-url"
+            placeholder="Ollama API URL (e.g., http://your-server-ip:11434)"
+          />
+        </div>
+        <button id="save-config">Save</button>
+        <button id="cancel-config">Cancel</button>
+      </div>
+
+      <!-- Ollama Models Section -->
+      <div class="section-header">
+        <h2>Ollama Models</h2>
+        <div class="section-toggle">
+          <button id="toggle-models-section" class="toggle-btn">
+            Show/Hide
+          </button>
+        </div>
+      </div>
+
+      <div id="models-container" class="models-container">
+        <div class="loading">Loading models...</div>
+      </div>
+
+      <div class="last-updated">
+        Last updated: <span id="last-updated">Never</span>
+      </div>
+
+      <!-- GPU Monitoring Section (Optional) -->
+      <div id="gpu-section" class="section-header" style="display: none">
+        <h2>GPU Monitoring (Optional)</h2>
+        <div class="section-toggle">
+          <button id="toggle-gpu-section" class="toggle-btn">Show/Hide</button>
+        </div>
+      </div>
+
+      <div id="gpu-container" class="gpu-container" style="display: none">
+        <div class="gpu-stats-card">
+          <h3>GPU Information</h3>
+          <div class="gpu-stat-row">
+            <span class="stat-label">Temperature:</span>
+            <span id="gpu-temperature" class="stat-value">--</span>
+          </div>
+          <div class="gpu-stat-row">
+            <span class="stat-label">GPU Utilization:</span>
+            <span id="gpu-utilization" class="stat-value">--</span>
+          </div>
+          <div class="gpu-stat-row">
+            <span class="stat-label">Memory Utilization:</span>
+            <span id="gpu-memory-utilization" class="stat-value">--</span>
+          </div>
+          <div class="gpu-stat-row">
+            <span class="stat-label">Memory Used:</span>
+            <span id="gpu-memory-used" class="stat-value">--</span>
+          </div>
+          <div class="gpu-stat-row">
+            <span class="stat-label">Power Draw:</span>
+            <span id="gpu-power-draw" class="stat-value">--</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="debug-link-section">
+        <a href="debug.html" class="debug-link">
+          <button class="config-btn">View Debug Log</button>
+        </a>
+      </div>
+    </div>
+
+    <script src="js/debug.js"></script>
+    <script src="js/ollama.js"></script>
+    <script src="js/gpu.js"></script>
+    <script src="js/api-test.js"></script>
+  </body>
+</html>

@@ -1,6 +1,6 @@
 // API Tester Script - Include this for debugging only
 document.addEventListener("DOMContentLoaded", function () {
-    // Add a test button to the debug section
+    // Add a test button to the debug section only if we're on the debug page
     const debugLog = document.getElementById("debug-log");
     if (debugLog) {
         const testAPIBtn = document.createElement("button");
@@ -13,12 +13,18 @@ document.addEventListener("DOMContentLoaded", function () {
         const testInput = document.createElement("div");
         testInput.innerHTML = `
         <div style="margin-bottom: 10px;">
-          <input id="test-api-url" type="text" placeholder="/api/gpu-data or full URL" 
-                 style="width: 70%; padding: 5px; margin-right: 10px;" value="http://localhost:5000/api/gpu-data">
+          <input id="test-api-url" type="text" placeholder="Enter API endpoint URL" 
+                 style="width: 70%; padding: 5px; margin-right: 10px;" value="http://localhost:11434/api/tags">
           <select id="endpoint-type" style="padding: 5px;">
             <option value="json">JSON</option>
             <option value="text">Text</option>
           </select>
+        </div>
+        <div style="margin-bottom: 10px; font-size: 12px; color: #666;">
+          <strong>Common Ollama endpoints:</strong><br>
+          • <a href="#" onclick="document.getElementById('test-api-url').value='http://localhost:11434/api/tags'; return false;">http://localhost:11434/api/tags</a> (Available models)<br>
+          • <a href="#" onclick="document.getElementById('test-api-url').value='http://localhost:11434/api/ps'; return false;">http://localhost:11434/api/ps</a> (Running models)<br>
+          • <a href="#" onclick="document.getElementById('test-api-url').value='http://localhost:11434'; return false;">http://localhost:11434</a> (Base URL - returns text)
         </div>
       `;
         debugLog.insertBefore(testInput, debugLog.firstChild);
@@ -33,58 +39,68 @@ async function testAPIEndpoint() {
     const endpointType = document.getElementById("endpoint-type").value;
 
     if (!apiUrl) {
-        gpuDebugLog("Please enter an API URL to test");
+        debugLog("Please enter an API URL to test");
         return;
     }
 
-    gpuDebugLog(`Testing API endpoint: ${apiUrl}`);
+    debugLog(`Testing API endpoint: ${apiUrl}`);
 
     try {
         // Attempt to fetch from the API
         const response = await fetch(apiUrl);
 
         // Log response status
-        gpuDebugLog(`Response status: ${response.status} ${response.statusText}`);
+        debugLog(`Response status: ${response.status} ${response.statusText}`);
 
         // Log response headers
         const headers = {};
         response.headers.forEach((value, key) => {
             headers[key] = value;
         });
-        gpuDebugLog("Response headers:", headers);
+        debugLog("Response headers:", headers);
+
+        // Clone the response before consuming it, so we can try both JSON and text if needed
+        const responseClone = response.clone();
 
         // Get the response content based on selected type
         let content;
         if (endpointType === 'json') {
             try {
                 content = await response.json();
-                gpuDebugLog("Response JSON:", content);
+                debugLog("Response JSON:", content);
             } catch (jsonError) {
-                // If JSON parsing fails, try getting text instead
-                const textContent = await response.clone().text();
-                gpuDebugLog(`JSON parsing failed. Raw response (first 300 chars):`);
-                gpuDebugLog(textContent.substring(0, 300) + '...');
+                // If JSON parsing fails, try getting text instead using the cloned response
+                const textContent = await responseClone.text();
+                debugLog(`JSON parsing failed. Raw response (first 300 chars):`);
+                debugLog(textContent.substring(0, 300) + '...');
             }
         } else {
             // Get text content
             const textContent = await response.text();
-            gpuDebugLog(`Response text (first 300 chars):`);
-            gpuDebugLog(textContent.substring(0, 300) + '...');
+            debugLog(`Response text (first 300 chars):`);
+            debugLog(textContent.substring(0, 300) + '...');
         }
 
-        // Check if response has the expected GPU data structure
-        if (content && content.gpus) {
-            gpuDebugLog("✅ Response contains GPU data structure!");
-            if (content.gpus.length > 0) {
-                gpuDebugLog("✅ Found GPU data:", content.gpus[0]);
+        // Check if response has the expected Ollama data structure
+        if (content && content.models) {
+            debugLog("✅ Response contains Ollama models data!");
+            if (content.models.length > 0) {
+                debugLog("✅ Found models:", content.models);
             } else {
-                gpuDebugLog("⚠️ GPU array is empty.");
+                debugLog("⚠️ Models array is empty.");
+            }
+        } else if (content && content.gpus) {
+            debugLog("✅ Response contains GPU data structure!");
+            if (content.gpus.length > 0) {
+                debugLog("✅ Found GPU data:", content.gpus[0]);
+            } else {
+                debugLog("⚠️ GPU array is empty.");
             }
         } else if (content) {
-            gpuDebugLog("⚠️ Response doesn't contain expected 'gpus' property");
+            debugLog("ℹ️ Response structure:", Object.keys(content));
         }
 
     } catch (error) {
-        gpuDebugLog(`❌ API test failed: ${error.message}`);
+        debugLog(`❌ API test failed: ${error.message}`);
     }
 }

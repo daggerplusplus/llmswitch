@@ -232,6 +232,146 @@ table th {
   color: #555;
 }
 
+/* Full Debug Log Page */
+.debug-log-full {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 20px;
+  margin-top: 20px;
+  min-height: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  font-family: 'Courier New', monospace;
+}
+
+.debug-log-full h3 {
+  margin-bottom: 15px;
+  color: var(--primary-color);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.debug-controls {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 20px;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.debug-controls .config-row {
+  margin-bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.debug-controls label {
+  margin-bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.debug-controls select {
+  padding: 5px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+/* Log Entry Styles */
+.log-entry {
+  margin-bottom: 8px;
+  padding: 8px;
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+.log-entry.log-error {
+  background-color: rgba(244, 67, 54, 0.1);
+  border-left: 4px solid var(--danger-color);
+}
+
+.log-entry.log-warning {
+  background-color: rgba(255, 152, 0, 0.1);
+  border-left: 4px solid var(--warning-color);
+}
+
+.log-entry.log-info {
+  background-color: rgba(76, 175, 80, 0.1);
+  border-left: 4px solid var(--success-color);
+}
+
+.log-timestamp {
+  color: #666;
+  font-weight: bold;
+}
+
+.log-error {
+  color: var(--danger-color);
+  font-weight: bold;
+}
+
+.log-warning {
+  color: var(--warning-color);
+  font-weight: bold;
+}
+
+.log-info {
+  color: var(--success-color);
+}
+
+.log-data {
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  margin: 5px 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.log-separator {
+  border: none;
+  border-top: 1px dashed #ccc;
+  margin: 5px 0;
+}
+
+.no-logs {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  padding: 40px 20px;
+}
+
+/* Debug Link Section */
+.debug-link-section {
+  text-align: center;
+  margin-top: 30px;
+  padding: 20px;
+  border-top: 1px solid var(--border-color);
+}
+
+.debug-link {
+  text-decoration: none;
+}
+
+.debug-link button {
+  background-color: var(--secondary-color);
+  padding: 10px 20px;
+  font-size: 1rem;
+}
+
+.debug-link button:hover {
+  background-color: var(--primary-color);
+}
+
 /* Mobile Card View */
 .mobile-card-view {
   display: flex;
