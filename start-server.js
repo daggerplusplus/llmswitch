@@ -25,6 +25,17 @@ const server = http.createServer((req, res) => {
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
+    // Handle API config endpoint
+    if (req.url === '/api/config') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        const config = {
+            ollamaHost: process.env.OLLAMA_HOST || 'localhost',
+            ollamaPort: process.env.OLLAMA_PORT || '11434'
+        };
+        res.end(JSON.stringify(config));
+        return;
+    }
+
     let filePath = '.' + req.url;
     if (filePath === './') {
         filePath = './index.html';

@@ -12,7 +12,9 @@ RUN npm install --production
 
 # Environment variables (can be overridden at runtime)
 ENV SERVER_HOST=0.0.0.0
-ENV PORT=8000
+ENV PORT=3000
+ENV OLLAMA_HOST=localhost
+ENV OLLAMA_PORT=11434
 
 # Expose port
 EXPOSE 8000

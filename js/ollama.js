@@ -1,11 +1,32 @@
 // Load configuration from localStorage or use default
 let OLLAMA_API_URL =
-  localStorage.getItem("ollamaApiUrl") || "http://localhost:11434";
+  localStorage.getItem("ollamaApiUrl") || null;
 // Load saved refresh interval from localStorage or use default
 const DEFAULT_REFRESH_INTERVAL = 30;
 let REFRESH_INTERVAL =
   parseInt(localStorage.getItem("refreshInterval")) ||
   DEFAULT_REFRESH_INTERVAL;
+
+// Fetch Ollama configuration from server environment variables
+async function loadOllamaConfig() {
+  try {
+    const response = await fetch('/api/config');
+    if (response.ok) {
+      const config = await response.json();
+      const ollamaUrl = `http://${config.ollamaHost}:${config.ollamaPort}`;
+      // Only use env config if no localStorage value exists
+      if (!OLLAMA_API_URL) {
+        OLLAMA_API_URL = ollamaUrl;
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load config from server:', error);
+    // Fallback to default if both env config and localStorage fail
+    if (!OLLAMA_API_URL) {
+      OLLAMA_API_URL = "http://localhost:11434";
+    }
+  }
+}
 
 // Variables to track refresh state
 let countdownValue = REFRESH_INTERVAL;
@@ -35,7 +56,10 @@ function debugLog(message, data = null) {
 window.fetchGpuData = null;
 
 // Main app logic
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
+  // Load configuration from server environment variables
+  await loadOllamaConfig();
+
   // Initialize API URL input
   document.getElementById("api-url").value = OLLAMA_API_URL;
 
