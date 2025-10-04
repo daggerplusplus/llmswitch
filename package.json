@@ -1,0 +1,15 @@
+{
+  "name": "llmswitch",
+  "version": "1.0.0",
+  "description": "LLM Switch - Monitor and manage Ollama models",
+  "main": "start-server.js",
+  "scripts": {
+    "start": "node start-server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  },
+  "keywords": ["ollama", "llm", "monitor"],
+  "author": "",
+  "license": "ISC"
+}
