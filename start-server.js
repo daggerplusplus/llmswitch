@@ -1,8 +1,11 @@
+require('dotenv').config();
+
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const port = 8000;
+const host = process.env.SERVER_HOST || 'localhost';
+const port = process.env.PORT || 8000;
 
 // MIME types for different file extensions
 const mimeTypes = {
@@ -46,8 +49,8 @@ const server = http.createServer((req, res) => {
     });
 });
 
-server.listen(port, () => {
-    console.log('LLMSwitch HTTP Server running at http://localhost:' + port);
-    console.log('Open your browser and go to: http://localhost:' + port);
+server.listen(port, host, () => {
+    console.log(`LLMSwitch HTTP Server running at http://${host}:${port}`);
+    console.log(`Open your browser and go to: http://${host}:${port}`);
     console.log('Press Ctrl+C to stop the server');
 });
