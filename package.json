@@ -4,12 +4,24 @@
   "description": "LLM Switch - Monitor and manage Ollama models",
   "main": "start-server.js",
   "scripts": {
-    "start": "node start-server.js"
+    "start": "node start-server.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "dotenv": "^16.4.5"
   },
-  "keywords": ["ollama", "llm", "monitor"],
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "supertest": "^6.3.3"
+  },
+  "keywords": [
+    "ollama",
+    "llm",
+    "monitor"
+  ],
   "author": "",
   "license": "ISC"
 }

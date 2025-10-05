@@ -31,7 +31,7 @@ const server = http.createServer((req, res) => {
         const config = {
             ollamaHost: process.env.OLLAMA_HOST || 'localhost',
             ollamaPort: process.env.OLLAMA_PORT || '11434',
-            gpuApiHost: process.env.GPU_API_HOST || 'your-server-ip',
+            gpuApiHost: process.env.GPU_API_HOST || 'localhost',
             gpuApiPort: process.env.GPU_API_PORT || '5000'
         };
         res.end(JSON.stringify(config));
@@ -64,6 +64,5 @@ const server = http.createServer((req, res) => {
 
 server.listen(port, host, () => {
     console.log(`LLMSwitch HTTP Server running at http://${host}:${port}`);
-    console.log(`Open your browser and go to: http://${host}:${port}`);
     console.log('Press Ctrl+C to stop the server');
 });

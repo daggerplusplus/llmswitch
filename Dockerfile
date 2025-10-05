@@ -13,9 +13,9 @@ RUN npm install --production
 # Environment variables (can be overridden at runtime)
 ENV SERVER_HOST=0.0.0.0
 ENV PORT=3000
-ENV OLLAMA_HOST=localhost
+ENV OLLAMA_HOST=0.0.0.0
 ENV OLLAMA_PORT=11434
-ENV GPU_API_HOST=your-server-ip
+ENV GPU_API_HOST=0.0.0.0
 ENV GPU_API_PORT=5000
 
 # Expose port
