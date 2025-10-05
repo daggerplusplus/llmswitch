@@ -1,6 +1,27 @@
 // Load configuration from localStorage or use explicit default
-let GPU_API_URL = localStorage.getItem("gpuApiUrl") || "http://your-server-ip:5000/api/gpu-data";
+let GPU_API_URL = localStorage.getItem("gpuApiUrl") || null;
 const DEFAULT_GPU_API_URL = "http://your-server-ip:5000/api/gpu-data";
+
+// Fetch GPU API configuration from server environment variables
+async function loadGpuConfig() {
+  try {
+    const response = await fetch('/api/config');
+    if (response.ok) {
+      const config = await response.json();
+      const gpuApiUrl = `http://${config.gpuApiHost}:${config.gpuApiPort}/api/gpu-data`;
+      // Only use env config if no localStorage value exists
+      if (!GPU_API_URL) {
+        GPU_API_URL = gpuApiUrl;
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load GPU config from server:', error);
+    // Fallback to default if both env config and localStorage fail
+    if (!GPU_API_URL) {
+      GPU_API_URL = DEFAULT_GPU_API_URL;
+    }
+  }
+}
 
 // Function to check if GPU API URL is set to a non-default value
 function isGpuApiConfigured() {
@@ -66,7 +87,10 @@ function updateGpuApiUrl(newUrl) {
 }
 
 // Main GPU monitoring logic
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
+  // Load configuration from server environment variables
+  await loadGpuConfig();
+
   // Initialize GPU API URL input
   const apiUrlInput = document.getElementById("gpu-api-url");
   if (apiUrlInput) {
