@@ -30,7 +30,9 @@ const server = http.createServer((req, res) => {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         const config = {
             ollamaHost: process.env.OLLAMA_HOST || 'localhost',
-            ollamaPort: process.env.OLLAMA_PORT || '11434'
+            ollamaPort: process.env.OLLAMA_PORT || '11434',
+            gpuApiHost: process.env.GPU_API_HOST || 'your-server-ip',
+            gpuApiPort: process.env.GPU_API_PORT || '5000'
         };
         res.end(JSON.stringify(config));
         return;
